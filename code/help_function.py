@@ -10,12 +10,47 @@ import random
 from math import log,sqrt
 from scipy.optimize import minimize
 
-class Help_function(object):
-    def __init__(self,Z,Y,threshold,cv=5):
-        self.Z=Z
-        self.Y=Y
-        self.cv=cv
-        self.threshold=threshold
+def Lasso_reg(Y,Z,debiased='False'):
+        """
+        This function gives the solution to the Lasso regression in a multivariate model
+        """
+        lasso = linear_model.LassoCV(cv=5)
+        lasso.fit(Z,Y)
+        g = lasso.coef_
+        u=lasso.intercept_
+        if debiased=='False':
+                return(g)
+        else:
+                return(g,u)
+
+
+def debiased_Lasso(Y,Z,delta):
+        n=Z.shape[0]
+        ones=np.ones(n)
+        g_t,u=Lasso_reg(Y,Z,debiased='True')
+        y_tilde=Y/delta
+        g_tilde=g_t+((1/n)*Z.T@(y_tilde-u*ones))
+        return(g_tilde)
+
+
+
+def s_grands_comp(vecteur, s):
+        indices_tries = np.argsort(vecteur)[::-1]
+        valeurs_triees = vecteur[indices_tries]
+        vecteur_s = np.zeros(len(vecteur))
+        for i in range(s):
+            vecteur_s[indices_tries[i]] = valeurs_triees[i]
+        return vecteur_s
+
+
+def IHT_classique(X, Y,s,step=0.00000001,max_iterations=4000):
+        n,m=X.shape
+        Z,beta_hat=np.zeros(m),np.ones(m)     
+        for i in range(max_iterations):
+            Z=beta_hat+(step*(X.T)@(Y-X@beta_hat))
+            beta_hat=s_grands_comp(Z, s)
+        return beta_hat
+        
     
     
 

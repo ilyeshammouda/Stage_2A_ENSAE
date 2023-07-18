@@ -10,14 +10,17 @@ import numpy as np
 import numpy.linalg as la
 from interface import BaseOptimizer
 from Cosamp import cosamp
+from help_function import Lasso_reg
+from help_function import debiased_Lasso
+from help_function import IHT_classique
 
 
 class ZORO(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
-    def __init__(self, x0, f, params, function_budget=10000, prox=None,
-                 function_target=None):
+    def __init__(self, x0, f, params, algo ,function_budget=10000, prox=None,
+                 function_target=None,s=20,step_IHT=0.0000001,itt_IHT=3000):
         
         super().__init__()
         
@@ -27,12 +30,17 @@ class ZORO(BaseOptimizer):
         self.f = f
         self.x = x0
         self.n = len(x0)
+        self.algo=algo
         self.t = 0
         self.delta = params["delta"]
         self.sparsity = params["sparsity"]
         self.step_size = params["step_size"]
         self.num_samples = params["num_samples"]
         self.prox = prox
+        self.s=s
+        self.step_IHT=step_IHT
+        self.itt_IHT=itt_IHT
+
         # Define sampling matrix
         Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
 
@@ -78,9 +86,14 @@ class ZORO(BaseOptimizer):
         function_estimate = function_estimate/num_samples
         
         Z = Z/np.sqrt(num_samples)
-        grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
-        
-    
+        if self.algo=='CoSaMP':
+            grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
+        if self.algo=='Lasso':
+            grad_estimate=Lasso_reg(y,Z)
+        if self.algo=='DLasso':
+            grad_estimate=debiased_Lasso(y,Z,delta)
+        if self.algo=='IHT_Classique':
+            grad_estimate=IHT_classique(X=Z,Y=y,s=self.s,step=self.step_IHT,max_iterations=self.itt_IHT)
         return grad_estimate, function_estimate
     
 
