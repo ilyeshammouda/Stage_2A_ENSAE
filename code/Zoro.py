@@ -136,8 +136,9 @@ class ZORO(BaseOptimizer):
         while termination is False:
             evals_ZORO, solution_ZORO, termination = self.step()
             # save some useful values
-            performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
+            #performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
             # print some useful values
+            performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
             self.report( 'Estimated f(x_k): %f  function evals: %d\n' %
             (np.mean(self.fd), evals_ZORO) )
         return(performance_log_ZORO)
