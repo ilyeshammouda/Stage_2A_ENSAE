@@ -13,14 +13,15 @@ from Cosamp import cosamp
 from help_function import Lasso_reg
 from help_function import debiased_Lasso
 from help_function import IHT_classique
+from help_function import IHT_ad
 
 
 class ZORO(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
-    def __init__(self, x0, f, params, algo ,function_budget=10000, prox=None,
-                 function_target=None,s=20,step_IHT=0.0000001,itt_IHT=3000):
+    def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
+                 function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1):
         
         super().__init__()
         
@@ -40,6 +41,9 @@ class ZORO(BaseOptimizer):
         self.s=s
         self.step_IHT=step_IHT
         self.itt_IHT=itt_IHT
+        self.threshold_IHT=threshold_IHT
+        self.C_IHT=C_IHT
+        self.lamda_IHT=lamda_IHT
 
         # Define sampling matrix
         Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
@@ -60,7 +64,7 @@ class ZORO(BaseOptimizer):
 
 
        
-    def CosampGradEstimate(self):
+    def GradEstimate(self):
         '''
         Gradient estimation sub-routine.
         '''
@@ -94,6 +98,8 @@ class ZORO(BaseOptimizer):
             grad_estimate=debiased_Lasso(y,Z,delta)
         if self.algo=='IHT_Classique':
             grad_estimate=IHT_classique(X=Z,Y=y,s=self.s,step=self.step_IHT,max_iterations=self.itt_IHT)
+        if self.algo=='IHT_ad':
+            grad_estimate=IHT_ad(X=Z,Y=y,threshold=self.threshold_IHT,C=self.C_IHT,step=self.step_IHT,max_iterations=self.itt_IHT,lamda=self.lamda_IHT)
         return grad_estimate, function_estimate
     
 
@@ -104,7 +110,7 @@ class ZORO(BaseOptimizer):
         Take step of optimizer
         '''
    
-        grad_est, f_est = self.CosampGradEstimate()
+        grad_est, f_est = self.GradEstimate()
         self.fd = f_est
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.

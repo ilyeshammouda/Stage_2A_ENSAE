@@ -43,15 +43,27 @@ def s_grands_comp(vecteur, s):
         return vecteur_s
 
 
-def IHT_classique(X, Y,s,step=0.00000001,max_iterations=4000):
+def IHT_classique(X, Y,s,step=0.00000001,max_iterations=30):
         n,m=X.shape
         Z,beta_hat=np.zeros(m),np.ones(m)     
         for i in range(max_iterations):
             Z=beta_hat+(step*(X.T)@(Y-X@beta_hat))
             beta_hat=s_grands_comp(Z, s)
         return beta_hat
+
+
+def HardThreshold(x,lamda):
+        return x*(np.abs(x)>=lamda)
         
-    
+def IHT_ad(X, Y,threshold ,C=0.9,step=0.0000001,max_iterations=30,lamda=0.1):
+        n,m=X.shape
+        Z,beta_hat=np.zeros(m),np.ones(m)  
+        for i in range(max_iterations):
+            Z=beta_hat+(step*(X.T)@(Y-X@beta_hat))
+            beta_hat=HardThreshold(Z, lamda)
+            while lamda > threshold:
+                lamda*=C
+        return beta_hat
     
 
 
