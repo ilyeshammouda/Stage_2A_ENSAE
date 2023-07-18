@@ -10,18 +10,15 @@ import numpy as np
 import numpy.linalg as la
 from interface import BaseOptimizer
 from Cosamp import cosamp
-from help_function import Lasso_reg
-from help_function import debiased_Lasso
-from help_function import IHT_classique
-from help_function import IHT_ad
-
+from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg
 
 class ZORO(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
     def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
-                 function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1):
+                 function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
+                 step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2):
         
         super().__init__()
         
@@ -44,6 +41,12 @@ class ZORO(BaseOptimizer):
         self.threshold_IHT=threshold_IHT
         self.C_IHT=C_IHT
         self.lamda_IHT=lamda_IHT
+        self.step_ista=step_ista
+        self.itt_ista=itt_ista
+        self.threshold_ista=threshold_ista
+        self.C_ista=C_ista
+        self.lamda_ista=lamda_ista
+
 
         # Define sampling matrix
         Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
@@ -100,6 +103,8 @@ class ZORO(BaseOptimizer):
             grad_estimate=IHT_classique(X=Z,Y=y,s=self.s,step=self.step_IHT,max_iterations=self.itt_IHT)
         if self.algo=='IHT_ad':
             grad_estimate=IHT_ad(X=Z,Y=y,threshold=self.threshold_IHT,C=self.C_IHT,step=self.step_IHT,max_iterations=self.itt_IHT,lamda=self.lamda_IHT)
+        if self.algo=='ISTA_ad':
+            grad_estimate=ISTA_ad(X=Z,Y=y,threshold=self.threshold_ista,C=self.C_ista,step=self.step_ista,max_iterations=self.itt_ista,lamda=self.lamda_ista)
         return grad_estimate, function_estimate
     
 
@@ -111,7 +116,6 @@ class ZORO(BaseOptimizer):
         '''
    
         grad_est, f_est = self.GradEstimate()
-        print(f'grad estimate {grad_est}')
         self.fd = f_est
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
@@ -137,9 +141,9 @@ class ZORO(BaseOptimizer):
         while termination is False:
             evals_ZORO, solution_ZORO, termination = self.step()
             # save some useful values
-            #performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
+            performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
             # print some useful values
-            performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
+            #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
             self.report( 'Estimated f(x_k): %f  function evals: %d\n' %
             (np.mean(self.fd), evals_ZORO) )
         return(performance_log_ZORO)

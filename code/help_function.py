@@ -54,6 +54,10 @@ def IHT_classique(X, Y,s,step=0.00000001,max_iterations=30):
 
 def HardThreshold(x,lamda):
         return x*(np.abs(x)>=lamda)
+
+
+def SoftThreshold(x, threshold):
+        return np.sign(x) * np.maximum(np.abs(x) - threshold, 0)
         
 def IHT_ad(X, Y,threshold ,C=0.9,step=0.0000001,max_iterations=30,lamda=0.1):
         n,m=X.shape
@@ -61,6 +65,17 @@ def IHT_ad(X, Y,threshold ,C=0.9,step=0.0000001,max_iterations=30,lamda=0.1):
         for i in range(max_iterations):
             Z=beta_hat+(step*(X.T)@(Y-X@beta_hat))
             beta_hat=HardThreshold(Z, lamda)
+            while lamda > threshold:
+                lamda*=C
+        return beta_hat
+
+
+def ISTA_ad(X, Y,threshold ,C=0.9,step=0.0000001,max_iterations=30,lamda=0.1):
+        n,m=X.shape
+        Z,beta_hat=np.zeros(m),np.ones(m)  
+        for i in range(max_iterations):
+            Z=beta_hat+(step*(X.T)@(Y-X@beta_hat))
+            beta_hat=SoftThreshold(Z, lamda)
             while lamda > threshold:
                 lamda*=C
         return beta_hat
