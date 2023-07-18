@@ -111,6 +111,7 @@ class ZORO(BaseOptimizer):
         '''
    
         grad_est, f_est = self.GradEstimate()
+        print(f'grad estimate {grad_est}')
         self.fd = f_est
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
