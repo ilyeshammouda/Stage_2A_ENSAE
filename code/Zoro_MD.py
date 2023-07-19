@@ -15,8 +15,7 @@ import projection as proj
 from MD import AcceleratedMethod
 import warnings
 
-
-class ZORO(BaseOptimizer):
+class ZORO_MD(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
@@ -123,18 +122,24 @@ class ZORO(BaseOptimizer):
         return grad_estimate, function_estimate
     
 
-    
-
-    def step(self):
+    def step_MD(self):
         '''
         Take step of optimizer
         '''
-   
+        # Define the Projection 
         grad_est, f_est = self.GradEstimate()
         self.fd = f_est
+        p1=proj.SimplexProjectionExpSort(dimension = self.n, epsilon = self.epsilon)
+        p2= proj.SimplexProjectionExpSort(dimension = self.n, epsilon = 0)
+        s2=1/self.lmax
+        s1=s2*self.epsilon/(1+self.n*self.epsilon)
+        acm=AcceleratedMethod(self.f, grad_est, p1, p2, s1, s2, self.r, self.x, 'accelerated descent')
+        acm.step()
+        x_k_plus_1=acm.x
+
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
-        self.x = self.Prox(self.x -self.step_size*grad_est) # gradient descent 
+        self.x = self.Prox(x_k_plus_1) # MD 
 
         if self.reachedFunctionBudget(self.function_budget, self.function_evals):
             # if budget is reached return current iterate
@@ -150,18 +155,15 @@ class ZORO(BaseOptimizer):
     
 
 
-    def Zoro(self):
-        performance_log_ZORO = [[0, self.f(self.x)]]
+    def Zoro_MD(self):
+        performance_log_ZORO_MD = [[0, self.f(self.x)]]
         termination = False
         while termination is False:
-            evals_ZORO, solution_ZORO, termination = self.step()
+            evals_ZORO, solution_ZORO, termination = self.step_MD()
             # save some useful values
-            performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
+            performance_log_ZORO_MD.append( [evals_ZORO,np.mean(self.fd)] )
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
             self.report( 'Estimated f(x_k): %f  function evals: %d\n' %
             (np.mean(self.fd), evals_ZORO) )
-        return(performance_log_ZORO)
-
-
-
+        return(performance_log_ZORO_MD)

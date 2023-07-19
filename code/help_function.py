@@ -11,11 +11,11 @@ from math import log,sqrt
 from scipy.optimize import minimize
 import numpy as np
 
-def Lasso_reg(Y,Z,debiased='False'):
+def Lasso_reg(Y,Z,debiased='False',cv=5,it=100):
         """
         This function gives the solution to the Lasso regression in a multivariate model
         """
-        lasso = linear_model.LassoCV(cv=5)
+        lasso = linear_model.LassoCV(cv=cv,max_iter=it)
         lasso.fit(Z,Y)
         g = lasso.coef_
         u=lasso.intercept_
@@ -25,10 +25,10 @@ def Lasso_reg(Y,Z,debiased='False'):
                 return(g,u)
 
 
-def debiased_Lasso(Y,Z,delta):
+def debiased_Lasso(Y,Z,delta,cv=5,it=100):
         n=Z.shape[0]
         ones=np.ones(n)
-        g_t,u=Lasso_reg(Y,Z,debiased='True')
+        g_t,u=Lasso_reg(Y,Z,debiased='True',cv=cv,it=it)
         y_tilde=Y/delta
         g_tilde=g_t+((1/n)*Z.T@(y_tilde-u*ones))
         return(g_tilde)
