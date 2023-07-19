@@ -13,6 +13,7 @@ from Cosamp import cosamp
 from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg
 import projection as proj
 from MD import AcceleratedMethod
+import warnings
 
 
 class ZORO(BaseOptimizer):
@@ -21,9 +22,13 @@ class ZORO(BaseOptimizer):
     '''
     def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
-                 step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,s1=0,s2=0,r=0):
+                 step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,lmax=20,r=3):
         
         super().__init__()
+        if r < 3:
+            # According to the article r should be greater or equal to 3 
+            warnings.warn("The value of 'r' should be greater than or equal to 3. Please set 'r' to a value greater than 3.", UserWarning)
+        
         
         self.function_evals = 0
         self.function_budget = function_budget
@@ -50,9 +55,8 @@ class ZORO(BaseOptimizer):
         self.C_ista=C_ista
         self.lamda_ista=lamda_ista
         self.epsilon=epsilon
-        self.s1=s1
-        self.s2=s2
         self.r=r
+        self.lmax=lmax
 
 
 
@@ -165,7 +169,9 @@ class ZORO(BaseOptimizer):
         p1=proj.SimplexProjectionExpSort(dimension = self.n, epsilon = self.epsilon)
         p2= proj.SimplexProjectionExpSort(dimension = self.n, epsilon = 0)
         grad_est, f_est = self.GradEstimate()
-        acm=AcceleratedMethod(self.f, grad_est, p1, p2, self.s1, self.s2, self.r, self.x, 'accelerated descent')
+        s2=1/self.lmax
+        s1=s2*self.epsilon/(1+self.n*self.epsilon)
+        acm=AcceleratedMethod(self.f, grad_est, p1, p2, s1, s2, self.r, self.x, 'accelerated descent')
         acm.step()
         x_k_plus_1=acm.x
 
@@ -187,7 +193,7 @@ class ZORO(BaseOptimizer):
     
 
 
-    def Zoro(self):
+    def Zoro_MD(self):
         performance_log_ZORO_MD = [[0, self.f(self.x)]]
         termination = False
         while termination is False:
