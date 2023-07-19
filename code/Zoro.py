@@ -11,6 +11,9 @@ import numpy.linalg as la
 from interface import BaseOptimizer
 from Cosamp import cosamp
 from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg
+import projection as proj
+from MD import AcceleratedMethod
+
 
 class ZORO(BaseOptimizer):
     '''
@@ -18,7 +21,7 @@ class ZORO(BaseOptimizer):
     '''
     def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
-                 step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2):
+                 step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,s1=0,s2=0,r=0):
         
         super().__init__()
         
@@ -46,6 +49,11 @@ class ZORO(BaseOptimizer):
         self.threshold_ista=threshold_ista
         self.C_ista=C_ista
         self.lamda_ista=lamda_ista
+        self.epsilon=epsilon
+        self.s1=s1
+        self.s2=s2
+        self.r=r
+
 
 
         # Define sampling matrix
@@ -147,4 +155,50 @@ class ZORO(BaseOptimizer):
             self.report( 'Estimated f(x_k): %f  function evals: %d\n' %
             (np.mean(self.fd), evals_ZORO) )
         return(performance_log_ZORO)
+    
+
+    def step_MD(self):
+        '''
+        Take step of optimizer
+        '''
+        # Define the Projection 
+        p1=proj.SimplexProjectionExpSort(dimension = self.n, epsilon = self.epsilon)
+        p2= proj.SimplexProjectionExpSort(dimension = self.n, epsilon = 0)
+        grad_est, f_est = self.GradEstimate()
+        acm=AcceleratedMethod(self.f, grad_est, p1, p2, self.s1, self.s2, self.r, self.x, 'accelerated descent')
+        acm.step()
+        x_k_plus_1=acm.x
+
+        # Note that if no prox operator was specified then self.prox is the
+        # identity mapping.
+        self.x = self.Prox(x_k_plus_1) # MD 
+
+        if self.reachedFunctionBudget(self.function_budget, self.function_evals):
+            # if budget is reached return current iterate
+            return self.function_evals, self.x, 'B'
+
+        if self.function_target is not None:
+            if self.reachedFunctionTarget(self.function_target, f_est):
+                # if function target is reached terminate
+                return self.function_evals, self.x, 'T'
+ 
+        self.t += 1
+        return self.function_evals, False, False
+    
+
+
+    def Zoro(self):
+        performance_log_ZORO_MD = [[0, self.f(self.x)]]
+        termination = False
+        while termination is False:
+            evals_ZORO, solution_ZORO, termination = self.step_MD()
+            # save some useful values
+            performance_log_ZORO_MD.append( [evals_ZORO,np.mean(self.fd)] )
+            # print some useful values
+            #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
+            self.report( 'Estimated f(x_k): %f  function evals: %d\n' %
+            (np.mean(self.fd), evals_ZORO) )
+        return(performance_log_ZORO_MD)
+
+
 
