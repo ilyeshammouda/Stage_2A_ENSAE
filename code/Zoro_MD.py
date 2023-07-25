@@ -162,7 +162,7 @@ class ZORO_MD(BaseOptimizer):
         termination = False
         while termination is False:
             evals_ZORO, solution_ZORO, termination = self.step_MD()
-            cost=np.linalg.norm(self.x-self.x_star)
+            cost=np.linalg.norm(solution_ZORO-self.x_star)
             # save some useful values
             performance_log_ZORO_MD.append( [evals_ZORO,np.mean(self.fd)] )
             cost_x.append([evals_ZORO,cost])
