@@ -163,8 +163,8 @@ class ZORO(BaseOptimizer):
             cost_x.append([evals_ZORO,cost])
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
-            self.report( 'Estimated f(x_k): %f  function evals: %d x_k-x_star: %d \n' %
-            (np.mean(self.fd), evals_ZORO,cost) )
+            self.report( 'Estimated f(x_k): %f x_k-x_star: %f  function evals: %d\n' %
+            (np.mean(self.fd),cost ,evals_ZORO) )
         return(performance_log_ZORO,cost_x)
 
 
