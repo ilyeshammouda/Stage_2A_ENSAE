@@ -61,7 +61,7 @@ class CompressibleQuadric(object):
 class weakly_sparse(object):
     '''An implementation of a weakly sparse  vector.'''
     def __init__(self,n, x_star, noiseamp):
-        self.noiseamp = noiseamp/np.sqrt(n)
+        self.noiseamp = noiseamp
         self.dim = n
         self.x_star=x_star
         self.rng = np.random.RandomState()

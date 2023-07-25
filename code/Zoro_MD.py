@@ -140,7 +140,8 @@ class ZORO_MD(BaseOptimizer):
 
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
-        self.x = self.Prox(x_k_plus_1) # MD 
+        #self.x = self.Prox(x_k_plus_1) # MD
+        self.x=x_k_plus_1
 
         if self.reachedFunctionBudget(self.function_budget, self.function_evals):
             # if budget is reached return current iterate
