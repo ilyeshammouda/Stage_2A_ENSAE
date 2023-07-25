@@ -156,10 +156,10 @@ class ZORO(BaseOptimizer):
         cost_x=[[0,np.linalg.norm(self.x-self.x_star)]]
         termination = False
         while termination is False:
+            cost=np.linalg.norm(self.x-self.x_star)
             evals_ZORO, solution_ZORO, termination = self.step()
             # save some useful values
             performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
-            cost=np.linalg.norm(self.x-self.x_star)
             cost_x.append([evals_ZORO,cost])
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
