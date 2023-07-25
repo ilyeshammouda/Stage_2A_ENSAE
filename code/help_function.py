@@ -10,6 +10,7 @@ import random
 from math import log,sqrt
 from scipy.optimize import minimize
 import numpy as np
+from scipy.sparse import csr_matrix
 
 def Lasso_reg(Y,Z,debiased='False',cv=5,it=100):
         """
@@ -101,6 +102,15 @@ class tools:
         Z=tools.Rademacher_matrix(d,n)
         Last_line_of_ones = np.ones((1, Z.shape[1]))
         return (Z,np.concatenate((Z, Last_line_of_ones), axis=0))
+    
+
+    def sparse_vector(n, s):
+        non_zero_indices = np.random.choice(range(n), size=s, replace=False)
+        non_zero_values = np.random.rand(s)
+        # Create the sparse vector using the CSR (Compressed Sparse Row) format
+        sparse_vector = np.zeros(n)
+        sparse_vector[non_zero_indices] = non_zero_values
+        return sparse_vector
     
 
 

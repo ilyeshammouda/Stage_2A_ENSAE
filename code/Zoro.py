@@ -23,7 +23,7 @@ class ZORO(BaseOptimizer):
     def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
                  step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,lmax=20,r=3,
-                 CV_lasso=5,itt_Lasso=100):
+                 CV_lasso=5,itt_Lasso=100,x_star=0):
         
         super().__init__()
         if r < 3:
@@ -60,6 +60,7 @@ class ZORO(BaseOptimizer):
         self.lmax=lmax
         self.CV_lasso=CV_lasso
         self.itt_Lasso=itt_Lasso
+        self.x_star=x_star
 
 
 
@@ -152,16 +153,18 @@ class ZORO(BaseOptimizer):
 
     def Zoro(self):
         performance_log_ZORO = [[0, self.f(self.x)]]
+        cost_x=[[0,np.linalg.norm(self.x-self.x_star)]]
         termination = False
         while termination is False:
             evals_ZORO, solution_ZORO, termination = self.step()
             # save some useful values
             performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
+            cost_x.append([0,np.linalg.norm(self.x-self.x_star)])
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
             self.report( 'Estimated f(x_k): %f  function evals: %d\n' %
             (np.mean(self.fd), evals_ZORO) )
-        return(performance_log_ZORO)
+        return(performance_log_ZORO,cost_x)
 
 
 

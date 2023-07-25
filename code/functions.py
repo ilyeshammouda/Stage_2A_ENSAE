@@ -56,3 +56,17 @@ class CompressibleQuadric(object):
         #f_no_noise = np.dot(x[0:self.s],x[0:self.s])
         #f_no_noise += 1e-4*np.dot(x[self.s:self.dim],x[self.s:self.dim])
         #return f_no_noise + self.noiseamp*self.rng.randn()
+    
+
+class weakly_sparse(object):
+    '''An implementation of a weakly sparse  vector.'''
+    def __init__(self,n, x_star, noiseamp):
+        self.noiseamp = noiseamp/np.sqrt(n)
+        self.dim = n
+        self.x_star=x_star
+        self.rng = np.random.RandomState()
+
+    def __call__(self, x):
+
+        f_no_noise = (np.linalg.norm(x-self.x_star))**2
+        return f_no_noise + self.noiseamp*self.rng.randn()
