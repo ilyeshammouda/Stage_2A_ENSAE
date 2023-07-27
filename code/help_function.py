@@ -12,11 +12,11 @@ from scipy.optimize import minimize
 import numpy as np
 from scipy.sparse import csr_matrix
 
-def Lasso_reg(Y,Z,debiased='False',cv=5,it=100):
+def Lasso_reg(Y,Z,debiased='False',cv=5,it=100,tol=0.0001):
         """
         This function gives the solution to the Lasso regression in a multivariate model
         """
-        lasso = linear_model.LassoCV(cv=cv,max_iter=it)
+        lasso = linear_model.LassoCV(cv=cv,max_iter=it,tol=tol)
         lasso.fit(Z,Y)
         g = lasso.coef_
         u=lasso.intercept_
@@ -26,10 +26,10 @@ def Lasso_reg(Y,Z,debiased='False',cv=5,it=100):
                 return(g,u)
 
 
-def debiased_Lasso(Y,Z,delta,cv=5,it=100):
+def debiased_Lasso(Y,Z,delta,cv=5,it=100,tol=0.0001):
         n=Z.shape[0]
         ones=np.ones(n)
-        g_t,u=Lasso_reg(Y,Z,debiased='True',cv=cv,it=it)
+        g_t,u=Lasso_reg(Y,Z,debiased='True',cv=cv,it=it,tol=tol)
         y_tilde=Y/delta
         g_tilde=g_t+((1/n)*Z.T@(y_tilde-u*ones))
         return(g_tilde)
