@@ -114,7 +114,7 @@ class ZORO_MD(BaseOptimizer):
         if self.algo=='Lasso':
             grad_estimate=Lasso_reg(y,Z,cv=self.CV_lasso,it=self.itt_Lasso,tol=self.tol_Lasso)
         if self.algo=='DLasso':
-            grad_estimate=debiased_Lasso(y,Z,delta,cv=self.CV_lasso,it=self.itt_Lasso,tol=self.tol)
+            grad_estimate=debiased_Lasso(y,Z,delta,cv=self.CV_lasso,it=self.itt_Lasso,tol=self.tol_Lasso)
         if self.algo=='IHT_Classique':
             grad_estimate=IHT_classique(X=Z,Y=y,s=self.s,step=self.step_IHT,max_iterations=self.itt_IHT)
         if self.algo=='IHT_ad':
