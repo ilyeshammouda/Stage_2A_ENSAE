@@ -102,6 +102,7 @@ class ZORO_MD(BaseOptimizer):
         for i in range(num_samples):
             y_temp = f(x + delta*np.transpose(Z[i,:]))
             y_temp2 = f(x)
+            y_temp3 = f(x- delta*np.transpose(Z[i,:]))
             function_estimate += y_temp2
             y[i] = (y_temp - y_temp2)/(np.sqrt(num_samples)*delta)
             self.function_evals += 2
