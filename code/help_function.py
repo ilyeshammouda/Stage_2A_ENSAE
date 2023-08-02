@@ -113,7 +113,13 @@ class tools:
         return sparse_vector
     
 
-    
+    def vecteur_sparse_support_S(n,s):
+        if s <= 0 or s > n:
+            raise ValueError("Le nombre de composantes non nulles doit être compris entre 1 et la taille du vecteur.")
+        zeros=np.zeros(n)
+        for i in range(s):
+            zeros[i]=np.random.normal(0,1)
+        return(zeros)
     
 
 
