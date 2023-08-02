@@ -58,7 +58,7 @@ class CompressibleQuadric(object):
         #return f_no_noise + self.noiseamp*self.rng.randn()
     
 
-class weakly_sparse(object):
+class norm_with_a_Gaussian_matrix(object):
     '''An implementation of a weakly sparse  vector.'''
     def __init__(self,n, x_star, noiseamp):
         self.noiseamp = noiseamp
@@ -67,6 +67,8 @@ class weakly_sparse(object):
         self.rng = np.random.RandomState()
 
     def __call__(self, x):
-
-        f_no_noise = (np.linalg.norm(x-self.x_star))**2
+        A=np.random.normal(size=(self.dim,self.dim))
+        f_no_noise = (np.linalg.norm(A@(x-self.x_star))/self.dim)**2
         return f_no_noise + self.noiseamp*self.rng.randn()
+
+
