@@ -30,7 +30,7 @@ def debiased_Lasso(Y,Z,delta,cv=5,it=100,tol=0.0001):
         n=Z.shape[0]
         ones=np.ones(n)
         g_t,u=Lasso_reg(Y,Z,debiased='True',cv=cv,it=it,tol=tol)
-        y_tilde=Y/delta
+        y_tilde=Y
         g_tilde=g_t+((1/n)*Z.T@(y_tilde-u*ones))
         return(g_tilde)
 

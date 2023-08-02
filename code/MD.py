@@ -61,7 +61,21 @@ class AcceleratedMethod(object):
         self.zprev = self.x0
         self.k = 1
     def step(self):
-         
+        
+        r = self.r
+        k = self.k
+        x = self.x
+        z = self.z
+        g = self.gradf
+
+        xtilde = self.p1.project(x, self.s1 * g)
+        self.xprev = self.x
+        self.x = xtilde  # Update x with xtilde
+        self.xtilde = xtilde  # Save xtilde for the next iteration
+        #self.z = ztilde
+        self.k = k + 1
+        
+        """
         r = self.r
         k = self.k
         x = self.x
@@ -76,21 +90,4 @@ class AcceleratedMethod(object):
         self.xtilde = xtilde
         self.x = xp
         self.k = k+1
-        
-        """ 
-        r = self.r
-        k = self.k
-        x = self.x
-        z = self.z
-        g = self.gradf
-
-        xtilde = self.p1.project(x, self.s1 * g)
-        #ztilde = self.p2.project(z, k**(self.alpha - 1) * self.s2 / r * g)
-
-        self.xprev = self.x
-        self.zprev = self.z
-        self.x = xtilde  # Update x with xtilde
-        self.xtilde = xtilde  # Save xtilde for the next iteration
-        #self.z = ztilde
-        self.k = k + 1
         """
