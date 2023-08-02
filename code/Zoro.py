@@ -23,7 +23,7 @@ class ZORO(BaseOptimizer):
     def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
                  step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,lmax=20,r=3,
-                 CV_lasso=5,itt_Lasso=100,x_star=0):
+                 CV_lasso=5,itt_Lasso=100,x_star=0,tol_Lasso=0.001):
         
         super().__init__()
         if r < 3:
@@ -61,6 +61,7 @@ class ZORO(BaseOptimizer):
         self.CV_lasso=CV_lasso
         self.itt_Lasso=itt_Lasso
         self.x_star=x_star
+        self.tol_Lasso=tol_Lasso
 
 
 
@@ -113,9 +114,9 @@ class ZORO(BaseOptimizer):
         if self.algo=='CoSaMP':
             grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
         if self.algo=='Lasso':
-            grad_estimate=Lasso_reg(y,Z,cv=self.CV_lasso,it=self.itt_Lasso)
+            grad_estimate=Lasso_reg(y,Z,cv=self.CV_lasso,it=self.itt_Lasso,tol=self.tol_Lasso)
         if self.algo=='DLasso':
-            grad_estimate=debiased_Lasso(y,Z,delta,cv=self.CV_lasso,it=self.itt_Lasso)
+            grad_estimate=debiased_Lasso(y,Z,delta,cv=self.CV_lasso,it=self.itt_Lasso,tol=self.tol_Lasso)
         if self.algo=='IHT_Classique':
             grad_estimate=IHT_classique(X=Z,Y=y,s=self.s,step=self.step_IHT,max_iterations=self.itt_IHT)
         if self.algo=='IHT_ad':
