@@ -70,5 +70,20 @@ class norm_with_a_Gaussian_matrix(object):
         A=np.random.normal(size=(self.dim,self.dim))
         f_no_noise = (np.linalg.norm(A@(x-self.x_star))/self.dim)**2
         return f_no_noise + self.noiseamp*self.rng.randn()
+    
 
+
+class square_of_the_difference_support_S(object):
+        def __init__(self,n, x_star, noiseamp):
+            self.noiseamp = noiseamp
+            self.dim = n
+            self.x_star=x_star
+            self.rng = np.random.RandomState()
+        
+        def __call__(self, x):
+            s=np.count_nonzero(self.x_star)
+            x_minus_x_star_square=np.square(x-self.x_star)
+            f_no_noise=np.sum(x_minus_x_star_square[:s])
+            return f_no_noise + self.noiseamp*self.rng.randn()
+        
 
