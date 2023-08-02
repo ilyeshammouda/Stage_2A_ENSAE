@@ -60,14 +60,15 @@ class CompressibleQuadric(object):
 
 class norm_with_a_Gaussian_matrix(object):
     '''An implementation of a weakly sparse  vector.'''
-    def __init__(self,n, x_star, noiseamp):
+    def __init__(self,n, x_star, noiseamp,A):
         self.noiseamp = noiseamp
         self.dim = n
         self.x_star=x_star
         self.rng = np.random.RandomState()
+        self.A=A
 
     def __call__(self, x):
-        A=np.random.normal(size=(self.dim,self.dim))
+        A=self.A
         f_no_noise = (np.linalg.norm(A@(x-self.x_star))/self.dim)**2
         return f_no_noise + self.noiseamp*self.rng.randn()
     

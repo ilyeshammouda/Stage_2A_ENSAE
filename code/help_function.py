@@ -83,7 +83,6 @@ def ISTA_ad(X, Y,threshold ,C=0.9,step=0.0000001,max_iterations=30,lamda=0.1):
         return beta_hat
 
 
-#import packages
 
 
 class tools:
