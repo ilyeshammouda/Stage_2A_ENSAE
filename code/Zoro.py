@@ -20,7 +20,7 @@ class ZORO(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
-    def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000, prox=None,
+    def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
                  step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,lmax=20,r=3,
                  CV_lasso=5,itt_Lasso=100,x_star=0,tol_Lasso=0.001):
@@ -43,7 +43,6 @@ class ZORO(BaseOptimizer):
         self.sparsity = params["sparsity"]
         self.step_size = params["step_size"]
         self.num_samples = params["num_samples"]
-        self.prox = prox
         self.s=s
         self.step_IHT=step_IHT
         self.itt_IHT=itt_IHT
@@ -73,14 +72,14 @@ class ZORO(BaseOptimizer):
         self.cosamp_params = cosamp_params
 
 
-
+    """ 
     # Handle the (potential) proximal operator
     def Prox(self, x):
         if self.prox is None:
             return x
         else:
             return self.prox.prox(x, self.step_size)
-        
+    """
 
 
        
@@ -137,7 +136,7 @@ class ZORO(BaseOptimizer):
         self.fd = f_est
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
-        self.x = self.Prox(self.x -self.step_size*grad_est) # gradient descent 
+        self.x = (self.x -self.step_size*grad_est) # gradient descent 
 
         if self.reachedFunctionBudget(self.function_budget, self.function_evals):
             # if budget is reached return current iterate
