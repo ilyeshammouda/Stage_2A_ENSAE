@@ -132,6 +132,11 @@ class ZORO_MD(BaseOptimizer):
         # Define the Projection 
         grad_est, f_est = self.GradEstimate()
         self.fd = f_est
+        self.fd = f_est
+        true_grad=np.zeros(self.n)
+        true_grad[0:self.s]=2*(self.x[0:self.s])
+        norm_Estimated_Grad=np.linalg.norm(grad_est-true_grad)
+        true_grad_norm=np.linalg.norm(true_grad)
         p1=proj.SimplexProjectionExpSort(dimension = self.n, epsilon = self.epsilon)
         p2= proj.SimplexProjectionExpSort(dimension = self.n, epsilon = 0)
         s2=1/self.lmax
@@ -147,15 +152,15 @@ class ZORO_MD(BaseOptimizer):
 
         if self.reachedFunctionBudget(self.function_budget, self.function_evals):
             # if budget is reached return current iterate
-            return self.function_evals, self.x, 'B'
+            return self.function_evals, self.x, 'B',norm_Estimated_Grad,true_grad_norm
 
         if self.function_target is not None:
             if self.reachedFunctionTarget(self.function_target, f_est):
                 # if function target is reached terminate
-                return self.function_evals, self.x, 'T'
+                return self.function_evals, self.x, 'T',norm_Estimated_Grad,true_grad_norm
  
         self.t += 1
-        return self.function_evals, False, False
+        return self.function_evals, False, False,norm_Estimated_Grad,true_grad_norm
     
 
 
@@ -164,13 +169,13 @@ class ZORO_MD(BaseOptimizer):
         cost_x=[[0,np.linalg.norm(self.x-self.x_star)]]
         termination = False
         while termination is False:
-            evals_ZORO, solution_ZORO, termination = self.step_MD()
+            evals_ZORO, solution_ZORO, termination,norm_Estimated_Grad,true_grad_norm = self.step_MD()
             cost=np.linalg.norm(self.x-self.x_star)
             # save some useful values
             performance_log_ZORO_MD.append( [evals_ZORO,np.mean(self.fd)] )
             cost_x.append([evals_ZORO,cost])
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
-            self.report( 'Estimated f(x_k): %f x_k-x_star: %f function evals: %d\n' %
-            (np.mean(self.fd), cost ,evals_ZORO) )
+            self.report( 'Estimated f(x_k): %f norm of the estimated gradient: %f  function evals: %d True_grad: %f \n' %
+            (np.mean(self.fd),norm_Estimated_Grad ,evals_ZORO,true_grad_norm) )
         return performance_log_ZORO_MD,cost_x
