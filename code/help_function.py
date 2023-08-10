@@ -157,6 +157,19 @@ class Tests:
             y_t_vecteur[i] = Tests.f_test(x_t, delta, d)
         y_t = Tests.f_test(x_t=x_t, delta=0, d=d, noise=0)
         return y_t_vecteur, y_t
-    
+
+
+
+def True_grad_SparseQuadric(x,s):
+     
+     grad=np.zeros(len(x))
+     grad[0:s]=x[0:s]
+     return(2*grad)
+
+
+def True_grad_square_of_the_difference_support_S(x,x_star,s):
+     grad=np.zeros(len(x))
+     grad[0:s]=(x-x_star)[0:s]
+     return(2*grad)
 
 

@@ -10,7 +10,7 @@ import numpy as np
 import numpy.linalg as la
 from interface import BaseOptimizer
 from Cosamp import cosamp
-from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg
+from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg,True_grad_SparseQuadric,True_grad_square_of_the_difference_support_S
 import projection as proj
 from MD import AcceleratedMethod
 import warnings
@@ -20,7 +20,7 @@ class ZORO(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
-    def __init__(self, x0, f, params, algo,true_grad ,threshold_IHT=2,function_budget=10000,
+    def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
                  step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,lmax=20,r=3,
                  CV_lasso=5,itt_Lasso=100,x_star=0,tol_Lasso=0.001):
@@ -61,15 +61,14 @@ class ZORO(BaseOptimizer):
         self.itt_Lasso=itt_Lasso
         self.x_star=x_star
         self.tol_Lasso=tol_Lasso
-        self.true_grad=true_grad
+        
 
 
         # Define sampling matrix
         Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
 
-        cosamp_params = {"Z": Z, "delta": self.delta, "maxiterations": 10,
+        cosamp_params = { "Z": Z,"delta": self.delta, "maxiterations": 10,
                          "tol": 0.5, "sparsity": self.sparsity}
-        self.cosamp_params = cosamp_params
 
 
     """ 
@@ -93,22 +92,21 @@ class ZORO(BaseOptimizer):
         delta = self.cosamp_params["delta"]
         sparsity = self.cosamp_params["sparsity"]
         tol = self.cosamp_params["tol"]
+        Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
         num_samples = np.size(Z, 0)
         x = self.x
         f = self.f
         y = np.zeros(num_samples)
         function_estimate = 0
-        
         for i in range(num_samples):
             y_temp = f(x + delta*np.transpose(Z[i,:]))
             y_temp3=f(x - delta*np.transpose(Z[i,:]))
             y_temp2 = f(x)
-            function_estimate += y_temp2
-            y[i] = (y_temp - y_temp2)/(np.sqrt(num_samples)*delta)
+            #function_estimate += y_temp2
+            y[i] = (y_temp - y_temp3)/(np.sqrt(num_samples)*delta)
             self.function_evals += 2
-            
-        function_estimate = function_estimate/num_samples
-        
+        function_estimate= f(x)
+        #function_estimate = function_estimate/num_samples
         Z = Z/np.sqrt(num_samples)
         if self.algo=='CoSaMP':
             grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
@@ -134,7 +132,8 @@ class ZORO(BaseOptimizer):
    
         grad_est, f_est = self.GradEstimate()
         self.fd = f_est
-        norm_Estimated_Grad_minus_true=np.linalg.norm(grad_est-self.true_grad)
+        true_grad=True_grad_square_of_the_difference_support_S(x=self.x,x_star=self.x_star,s=self.s)
+        norm_Estimated_Grad_minus_true=np.linalg.norm(grad_est-true_grad)
         est_grad_norm=np.linalg.norm(grad_est)
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
