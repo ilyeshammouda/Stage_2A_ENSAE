@@ -10,7 +10,7 @@ import numpy as np
 import numpy.linalg as la
 from interface import BaseOptimizer
 from Cosamp import cosamp
-from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg,True_grad_SparseQuadric,True_grad_square_of_the_difference_support_S
+from help_function import ISTA_ad,IHT_ad,IHT_classique,debiased_Lasso,Lasso_reg,True_grad_SparseQuadric,True_grad_square_of_the_difference_support_S,True_grad_norm_with_a_Gaussian_matrix
 import projection as proj
 from MD import AcceleratedMethod
 import warnings
@@ -61,7 +61,7 @@ class ZORO(BaseOptimizer):
         self.itt_Lasso=itt_Lasso
         self.x_star=x_star
         self.tol_Lasso=tol_Lasso
-        
+        self.M=params["M"]
 
 
         # Define sampling matrix
@@ -104,7 +104,7 @@ class ZORO(BaseOptimizer):
             y_temp3=f(x - delta*np.transpose(Z[i,:]))
             y_temp2 = f(x)
             #function_estimate += y_temp2
-            y[i] = (y_temp - y_temp3)/(np.sqrt(num_samples)*delta)
+            y[i] = (y_temp - y_temp3)/(2*np.sqrt(num_samples)*delta)
             self.function_evals += 2
         function_estimate= f(x)
         #function_estimate = function_estimate/num_samples
@@ -133,7 +133,7 @@ class ZORO(BaseOptimizer):
    
         grad_est, f_est = self.GradEstimate()
         self.fd = f_est
-        true_grad=True_grad_square_of_the_difference_support_S(x=self.x,x_star=self.x_star,s=self.s)
+        true_grad=True_grad_norm_with_a_Gaussian_matrix(x=self.x,x_star=self.x_star,A=self.M)
         norm_Estimated_Grad_minus_true=np.linalg.norm(grad_est-true_grad)
         est_grad_norm=np.linalg.norm(grad_est)
         # Note that if no prox operator was specified then self.prox is the

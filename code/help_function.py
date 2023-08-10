@@ -172,4 +172,10 @@ def True_grad_square_of_the_difference_support_S(x,x_star,s):
      grad[0:s]=(x-x_star)[0:s]
      return(2*grad)
 
+def True_grad_norm_with_a_Gaussian_matrix(x,x_star,A):
+    diag_A = np.diagonal(A)
+    matrix_diag_A = np.diag(diag_A)
+    part1=2*(matrix_diag_A@(x-x_star))       
+    part2=A@(x-x_star)
+    return(part1+part2)
 

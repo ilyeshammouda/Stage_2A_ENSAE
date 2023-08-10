@@ -101,7 +101,7 @@ class ZORO_New_Z(BaseOptimizer):
             y_temp3=f(x - delta*np.transpose(Z[i,:]))
             y_temp2 = f(x)
             #function_estimate += y_temp2
-            y[i] = (y_temp - y_temp3)/(np.sqrt(num_samples)*delta)
+            y[i] = (y_temp - y_temp2)/(np.sqrt(num_samples)*delta)
             self.function_evals += 2
         function_estimate= f(x)
         #function_estimate = function_estimate/num_samples
