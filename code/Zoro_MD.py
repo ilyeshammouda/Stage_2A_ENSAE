@@ -179,6 +179,6 @@ class ZORO_MD(BaseOptimizer):
             #cost_x.append([evals_ZORO,cost])
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
-            self.report( 'Estimated f(x_k): %f norm of the estimated gradient: %f  function evals: %d True_grad: %f \n' %
+            self.report( 'Estimated f(x_k): %f norm of the estimated gradient: %f  function evals: %d Norm True-Estimated grad: %f \n' %
             (np.mean(self.fd),(est_grad_norm_list[-1])[-1] ,evals_ZORO,(norm_Estimated_Grad_minus_true_list[-1])[-1]) )
         return performance_log_ZORO_MD,norm_Estimated_Grad_minus_true_list,est_grad_norm_list
