@@ -20,7 +20,7 @@ class ZORO(BaseOptimizer):
     '''
     ZORO for black box optimization. 
     '''
-    def __init__(self, x0, f, params, algo ,threshold_IHT=2,function_budget=10000,
+    def __init__(self, x0, f, params, algo,true_grad ,threshold_IHT=2,function_budget=10000,
                  function_target=None,s=20,step_IHT=0.0000001,itt_IHT=30,C_IHT=0.9,lamda_IHT=0.1,
                  step_ista=0.0000001,itt_ista=30,C_ista=0.9,lamda_ista=0.1,threshold_ista=2,epsilon=0,lmax=20,r=3,
                  CV_lasso=5,itt_Lasso=100,x_star=0,tol_Lasso=0.001):
@@ -61,7 +61,7 @@ class ZORO(BaseOptimizer):
         self.itt_Lasso=itt_Lasso
         self.x_star=x_star
         self.tol_Lasso=tol_Lasso
-
+        self.true_grad=true_grad
 
 
         # Define sampling matrix
@@ -134,43 +134,46 @@ class ZORO(BaseOptimizer):
    
         grad_est, f_est = self.GradEstimate()
         self.fd = f_est
-        true_grad=np.zeros(self.n)
-        true_grad[0:self.s]=2*(self.x[0:self.s])
-        norm_Estimated_Grad=np.linalg.norm(grad_est-true_grad)
-        true_grad_norm=np.linalg.norm(true_grad)
+        norm_Estimated_Grad_minus_true=np.linalg.norm(grad_est-self.true_grad)
+        est_grad_norm=np.linalg.norm(grad_est)
         # Note that if no prox operator was specified then self.prox is the
         # identity mapping.
         self.x = (self.x -self.step_size*grad_est) # gradient descent 
 
         if self.reachedFunctionBudget(self.function_budget, self.function_evals):
             # if budget is reached return current iterate
-            return self.function_evals, self.x, 'B',norm_Estimated_Grad,true_grad_norm
+            return self.function_evals, self.x, 'B',norm_Estimated_Grad_minus_true,est_grad_norm
 
         if self.function_target is not None:
             if self.reachedFunctionTarget(self.function_target, f_est):
                 # if function target is reached terminate
-                return self.function_evals, self.x, 'T',norm_Estimated_Grad,true_grad_norm
+                return self.function_evals, self.x, 'T',norm_Estimated_Grad_minus_true,est_grad_norm
  
         self.t += 1
-        return self.function_evals, False, False,norm_Estimated_Grad,true_grad_norm
+        return self.function_evals, False, False,norm_Estimated_Grad_minus_true,est_grad_norm
     
 
 
     def Zoro(self):
         performance_log_ZORO = [[0, self.f(self.x)]]
         #cost_x=[[0,np.linalg.norm(self.x-self.x_star)]]
+        norm_Estimated_Grad_minus_true_list=[]
+        est_grad_norm_list=[]
         termination = False
         while termination is False:
-            evals_ZORO, solution_ZORO, termination,norm_Estimated_Grad,true_grad_norm = self.step()
-            cost=np.linalg.norm(self.x-self.x_star)
+            evals_ZORO, solution_ZORO, termination,norm_Estimated_Grad_minus_true,est_grad_norm = self.step()
+            #cost=np.linalg.norm(self.x-self.x_star)
+            
             # save some useful values
             performance_log_ZORO.append( [evals_ZORO,np.mean(self.fd)] )
             #cost_x.append([evals_ZORO,cost])
+            norm_Estimated_Grad_minus_true_list.append([evals_ZORO,norm_Estimated_Grad_minus_true])
+            est_grad_norm_list.append([evals_ZORO,est_grad_norm])
             # print some useful values
             #performance_log_ZORO.append( [evals_ZORO,self.f(solution_ZORO)] )
-            self.report( 'Estimated f(x_k): %f norm of the estimated gradient: %f  function evals: %d True_grad: %f \n' %
-            (np.mean(self.fd),norm_Estimated_Grad ,evals_ZORO,true_grad_norm) )
-        return(performance_log_ZORO,norm_Estimated_Grad)
+            self.report( 'Estimated f(x_k): %f norm of the estimated gradient: %f  function evals: %d Norm True-Estimated grad: %f \n' %
+            (np.mean(self.fd),(est_grad_norm_list[-1])[-1] ,evals_ZORO,(norm_Estimated_Grad_minus_true_list[-1])[-1]) )
+        return(performance_log_ZORO,norm_Estimated_Grad_minus_true_list,est_grad_norm_list)
 
 
 
