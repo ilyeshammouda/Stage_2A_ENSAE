@@ -69,6 +69,7 @@ class ZORO(BaseOptimizer):
 
         cosamp_params = { "Z": Z,"delta": self.delta, "maxiterations": 10,
                          "tol": 0.5, "sparsity": self.sparsity}
+        self.cosamp_params = cosamp_params
 
 
     """ 
