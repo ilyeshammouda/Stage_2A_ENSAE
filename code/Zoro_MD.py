@@ -136,7 +136,7 @@ class ZORO_MD(BaseOptimizer):
 
         # Change to the correct method of computing the true gradient if necessary.
          
-        true_grad=True_grad_norm_with_a_Gaussian_matrix(x=self.x,x_star=self.x_star,s=self.s,A=self.M)
+        true_grad=True_grad_square_of_the_difference_support_S(x=self.x,x_star=self.x_star,s=self.s)
         norm_Estimated_Grad_minus_true=np.linalg.norm(grad_est-true_grad)
         est_grad_norm=np.linalg.norm(grad_est)
         
