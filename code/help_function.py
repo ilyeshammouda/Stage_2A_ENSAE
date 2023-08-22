@@ -37,13 +37,12 @@ def debiased_Lasso(Y,Z,delta,cv=5,it=100,tol=0.0001):
 
 
 def s_grands_comp(vecteur, s):
-        indices_tries = np.argsort(vecteur)[::-1]
-        valeurs_triees = vecteur[indices_tries]
-        vecteur_s = np.zeros(len(vecteur))
-        for i in range(s):
-            vecteur_s[indices_tries[i]] = valeurs_triees[i]
-        return vecteur_s
-
+    vecteur_np = np.array(vecteur)
+    s_largest_indices = np.abs(vecteur_np).argsort()[-s:][::-1]
+    s_plus_larges = np.zeros_like(vecteur_np)
+    s_plus_larges[s_largest_indices] = vecteur_np[s_largest_indices]
+    
+    return s_plus_larges
 
 def IHT_classique(X, Y,s,step=0.00000001,max_iterations=30):
         n,m=X.shape
@@ -179,3 +178,6 @@ def True_grad_norm_with_a_Gaussian_matrix(x,x_star,A):
     part2=A@(x-x_star)
     return(part1+part2)
 
+
+
+     
