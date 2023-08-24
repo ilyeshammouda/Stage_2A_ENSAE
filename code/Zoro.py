@@ -108,7 +108,7 @@ class ZORO(BaseOptimizer):
             self.function_evals += 2
         function_estimate= f(x)
         #function_estimate = function_estimate/num_samples
-        Z = Z/np.sqrt(num_samples)
+        #Z = Z/np.sqrt(num_samples)
         if self.algo=='CoSaMP':
             grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
         if self.algo=='Lasso':
@@ -117,6 +117,7 @@ class ZORO(BaseOptimizer):
             grad_estimate=debiased_Lasso(y,Z,delta,cv=self.CV_lasso,it=self.itt_Lasso,tol=self.tol_Lasso)
         if self.algo=='IHT_Classique':
             grad_estimate=IHT_classique(X=Z,Y=y,s=self.s,step=self.step_IHT,max_iterations=self.itt_IHT)
+            s_1=np.count_nonzero(grad_estimate)
         if self.algo=='IHT_ad':
             grad_estimate=IHT_ad(X=Z,Y=y,threshold=self.threshold_IHT,C=self.C_IHT,step=self.step_IHT,max_iterations=self.itt_IHT,lamda=self.lamda_IHT)
         if self.algo=='ISTA_ad':
@@ -134,6 +135,7 @@ class ZORO(BaseOptimizer):
         grad_est, f_est = self.GradEstimate()
         self.fd = f_est
         true_grad=True_grad_square_of_the_difference_support_S(x=self.x,x_star=self.x_star,s=self.s)
+        s_2=np.count_nonzero(true_grad)
         norm_true_Grad=np.linalg.norm(true_grad)
         est_grad_norm=np.linalg.norm(grad_est)
         # Note that if no prox operator was specified then self.prox is the
